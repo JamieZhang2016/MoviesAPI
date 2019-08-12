@@ -26,7 +26,6 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApiContext>(context => context.UseInMemoryDatabase("TestDatabase"));
-            //services.AddDbContext<ApiContext>(context => InMemoryContext());
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

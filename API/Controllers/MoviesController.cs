@@ -27,7 +27,6 @@ namespace API.Controllers
             try
             {
                 if (String.IsNullOrEmpty(String.Concat(title, partialTitle, releaseYear, genres)))
-                //&& String.IsNullOrEmpty(partialTitle) && String.IsNullOrEmpty(releaseYear) && String.IsNullOrEmpty(genres))
                 {
                     return NotFound(); //Returns 404 - Not Found.
                 }
