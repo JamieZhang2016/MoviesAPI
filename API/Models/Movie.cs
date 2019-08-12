@@ -10,7 +10,8 @@ namespace API.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string PartialTitle { get; set; }
-        public string ReleaseYear { get; set; }
-        public List<string> Genres { get; set; }
+        public string YearOfRelease { get; set; }
+        public TimeSpan RunningTime { get; set; }
+        public string Genres { get; set; }
     }
 }
