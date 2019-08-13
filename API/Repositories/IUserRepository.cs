@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace API.Repositories
 {
-    public interface IMovieRepository
+    public interface IUserRepository
     {
-        Task<IEnumerable<Movie>> GetAll();
-        Task<Movie> GetSingle(string title);
+        Task<User> GetSingle(string userName);
     }
 }

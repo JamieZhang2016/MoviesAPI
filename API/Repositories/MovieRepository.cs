@@ -20,5 +20,10 @@ namespace API.Repositories
         {
             return await _context.Movies.ToListAsync();
         }
+
+        public async Task<Movie> GetSingle(string title)
+        {
+            return await _context.Movies.FirstOrDefaultAsync(m => m.Title == title);
+        }
     }
 }

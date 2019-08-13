@@ -31,6 +31,8 @@ namespace API
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddTransient<IMovieRepository, MovieRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IRatingRepository, RatingRepository>();
         }
 
         private ApiContext InMemoryContext()

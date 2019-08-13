@@ -17,11 +17,15 @@ namespace API.Controllers
     {
         private readonly ApiContext _context;
         private readonly IMovieRepository _movieRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IRatingRepository _ratingRepository;
 
-        public MoviesController(ApiContext context, IMovieRepository movieRepository)
+        public MoviesController(IMovieRepository movieRepository, IUserRepository userRepository, IRatingRepository ratingRepository)   //ApiContext context, 
         {
-            _context = context;
+            //_context = context;
             _movieRepository = movieRepository;
+            _userRepository = userRepository;
+            _ratingRepository = ratingRepository;
         }
 
         [HttpGet("GetMovies", Name = nameof(GetMovies))]
