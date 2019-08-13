@@ -13,5 +13,6 @@ namespace API.Models
         public string YearOfRelease { get; set; }
         public TimeSpan RunningTime { get; set; }
         public string Genres { get; set; }
+        public List<Rating> Ratings { get; set; }
     }
 }

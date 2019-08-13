@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
+using API.Repositories;
 
 namespace API
 {
@@ -28,6 +29,8 @@ namespace API
             services.AddDbContext<ApiContext>(context => context.UseInMemoryDatabase("TestDatabase"));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddTransient<IMovieRepository, MovieRepository>();
         }
 
         private ApiContext InMemoryContext()

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Models;
+using API.Repositories;
 
 namespace API.Controllers
 {
@@ -15,10 +16,12 @@ namespace API.Controllers
     public class MoviesController : ControllerBase
     {
         private readonly ApiContext _context;
+        private readonly IMovieRepository _movieRepository;
 
-        public MoviesController(ApiContext context)
+        public MoviesController(ApiContext context, IMovieRepository movieRepository)
         {
             _context = context;
+            _movieRepository = movieRepository;
         }
 
         [HttpGet("GetMovies", Name = nameof(GetMovies))]
@@ -86,7 +89,8 @@ namespace API.Controllers
                     {
                         foreach (Rating rating in ratings)
                         {
-                            var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == rating.MovieId);
+                            var movie = rating.Movie;
+
                             if (movie != null)
                             {
                                 returnDtos.Add(new MovieDto()
@@ -170,7 +174,8 @@ namespace API.Controllers
         private async Task<List<MovieDto>> GetMoviesDto()
         {
             var movieDtos = new List<MovieDto>();
-            var movies = await _context.Movies.ToListAsync();
+            //var movies = await _context.Movies.ToListAsync();
+            var movies = await _movieRepository.GetAll();
             if (movies != null && movies.Count() > 0)
             {
                 movieDtos = ConvertMovieDto(movies);
@@ -178,7 +183,7 @@ namespace API.Controllers
             return movieDtos;
         }
 
-        private List<MovieDto> ConvertMovieDto(List<Movie> movies)
+        private List<MovieDto> ConvertMovieDto(IEnumerable<Movie> movies)
         {
             var movieDtos = new List<MovieDto>();
             movieDtos = movies.Select(m => new MovieDto
@@ -189,8 +194,9 @@ namespace API.Controllers
                 yearOfRelease = m.YearOfRelease,
                 runningTime = m.RunningTime.ToString(),
                 genres = m.Genres,
-                averageRating = GetMovieAvgRating(m.Id),
-                userRating = null,
+                averageRating = GetMovieAvgRating(m.Id)
+                //,
+                //userRating = null,
             }).OrderBy(m => m.title).ToList();
 
             return movieDtos;

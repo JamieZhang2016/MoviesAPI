@@ -9,6 +9,6 @@ namespace API.Models
     {
         public int Id { get; set; }
         public string UserName { get; set; }
-        //public List<Rating> Ratings { get; set; }
+        public List<Rating> Ratings { get; set; }
     }
 }
