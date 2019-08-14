@@ -119,8 +119,8 @@ namespace API.Controllers
         }
 
         //[HttpPost("AddRating", Name = nameof(AddRating))]
-        [HttpGet("AddRating", Name = nameof(AddRating))]  //actually it's better to use HttpPost here, since when testing we call this api from url, I keep HttpGet for now.
-        public async Task<IActionResult> AddRating([FromQuery]string userName, [FromQuery]string movieTitle, [FromQuery]string rating)
+        [HttpGet("AddRating/{username}/{movietitle}/{rating}", Name = nameof(AddRating))]  //actually it's better to use HttpPost here, since when testing we call this api from url, I keep HttpGet for now.
+        public async Task<IActionResult> AddRating(string userName, string movieTitle, string rating)
         {
             try
             {
