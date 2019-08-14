@@ -7,7 +7,7 @@ Framework:
 Test Data:
 Test data create by using Entity Framework Core UseInMemoryDatabase
 
-API request url examples: (A,B,C use queryString to pass parameters)
+API request url examples: (A,C use queryString to pass parameters)
 
 API A: https://localhost:44300/api/movies?title=Movie001&releaseYear=2012
 
