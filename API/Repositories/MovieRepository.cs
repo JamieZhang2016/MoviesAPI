@@ -16,12 +16,17 @@ namespace API.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Movie>> GetAll()
+        public async Task<List<Movie>> GetAll()
         {
-            return await _context.Movies.ToListAsync();
+            return await _context.Movies.Include(r => r.Ratings).ToListAsync();
         }
 
-        public async Task<Movie> GetSingle(string title)
+        public async Task<Movie> GetSingleById(int id)
+        {
+            return await _context.Movies.Include(r=>r.Ratings).FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<Movie> GetSingleByTitle(string title)
         {
             return await _context.Movies.FirstOrDefaultAsync(m => m.Title == title);
         }

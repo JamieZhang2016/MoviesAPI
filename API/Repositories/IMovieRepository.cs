@@ -1,4 +1,5 @@
-﻿using API.Models;
+﻿using API.Dto;
+using API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,8 @@ namespace API.Repositories
 {
     public interface IMovieRepository
     {
-        Task<IEnumerable<Movie>> GetAll();
-        Task<Movie> GetSingle(string title);
+        Task<List<Movie>> GetAll();
+        Task<Movie> GetSingleById(int id);
+        Task<Movie> GetSingleByTitle(string title);
     }
 }

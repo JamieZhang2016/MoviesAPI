@@ -15,7 +15,6 @@ namespace API.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-        private readonly ApiContext _context;
         private readonly IMovieRepository _movieRepository;
         private readonly IUserRepository _userRepository;
         private readonly IRatingRepository _ratingRepository;
@@ -35,7 +34,7 @@ namespace API.Controllers
             {
                 if (String.IsNullOrEmpty(String.Concat(title, partialTitle, releaseYear, genres)))
                 {
-                    return NotFound(); //Returns 404 - Not Found.
+                    return NotFound(); //Return 404 - Not Found.
                 }
                 else
                 {
@@ -53,13 +52,13 @@ namespace API.Controllers
                     }
                     else
                     {
-                        return BadRequest(); //Returns 400 - Bad Request.
+                        return BadRequest(); //Return 400 - Bad Request.
                     }
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(); //Returns 400 - Bad Request.
+                return BadRequest(); //Return 400 - Bad Request.
             }
 
         }
@@ -79,14 +78,13 @@ namespace API.Controllers
                     }
                     else
                     {
-                        return BadRequest(); //Returns 400 - Bad Request.
+                        return BadRequest(); //Return 400 - Bad Request.
                     }
                 }
                 else
                 {
                     //get top 5 ratings for giving user
-                    var ratings = await _context.Ratings.Where(r => r.User.UserName == userName)
-                        .OrderByDescending(m => m.RatingScore).Take(5).ToArrayAsync();
+                    var ratings = await _ratingRepository.GetTop5RatingByUserName(userName);
 
                     var returnDtos = new List<MovieDto>();
                     if (ratings != null && ratings.Count() > 0)
@@ -106,7 +104,7 @@ namespace API.Controllers
                                     runningTime = movie.RunningTime.ToString(),
                                     genres = movie.Genres,
                                     userRating = rating.RatingScore,
-                                    averageRating = GetMovieAvgRating(movie.Id)
+                                    averageRating = GetMovieAvgRating(movie.Ratings)
                                 });
                             }
                         }
@@ -120,7 +118,8 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("AddRating", Name = nameof(AddRating))]
+        //[HttpPost("AddRating", Name = nameof(AddRating))]
+        [HttpGet("AddRating", Name = nameof(AddRating))]  //actually it's better to use HttpPost here, since when testing we call this api from url, I keep HttpGet for now.
         public async Task<IActionResult> AddRating([FromQuery]string userName, [FromQuery]string movieTitle, [FromQuery]string rating)
         {
             try
@@ -131,8 +130,8 @@ namespace API.Controllers
                 }
                 else
                 {
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
-                    var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Title == movieTitle);
+                    var user = await _userRepository.GetSingle(userName);
+                    var movie = await _movieRepository.GetSingleByTitle(movieTitle);
 
                     if (user == null || movie == null)
                     {
@@ -141,27 +140,19 @@ namespace API.Controllers
 
                     if (int.TryParse(rating, out var parsedRating) && parsedRating >= 1 && parsedRating <= 5)
                     {
-                        var rateExists = await _context.Ratings.FirstOrDefaultAsync(m => m.UserId == user.Id && m.MovieId == movie.Id);
+                        var ratingNew = await _ratingRepository.AddUpdateRating(user, movie, parsedRating); 
 
-                        if (rateExists == null)
+                        var ratingDto = new RatingDto()
                         {
-                            var rate = new Rating()
-                            {
-                                UserId = user.Id,
-                                User = user,
-                                MovieId = movie.Id,
-                                RatingScore = parsedRating
-                            };
-                            _context.Ratings.Add(rate);
-                        }
-                        else
-                        {
-                            rateExists.RatingScore = parsedRating;
-                        }
-                        
-                        await _context.SaveChangesAsync();
+                            Id = ratingNew.Id,
+                            UserId = user.Id,
+                            UserName = userName,
+                            MovieId = movie.Id,
+                            MovieTitle = movieTitle,
+                            RatingScore = parsedRating
+                        };
 
-                        return Ok(_context.Ratings.Where(r=>r.UserId == user.Id).ToArrayAsync());  // return all ratings of the giving user for verification
+                        return Ok(ratingDto);
                     }
                     else
                     {
@@ -178,40 +169,26 @@ namespace API.Controllers
         private async Task<List<MovieDto>> GetMoviesDto()
         {
             var movieDtos = new List<MovieDto>();
-            //var movies = await _context.Movies.ToListAsync();
             var movies = await _movieRepository.GetAll();
             if (movies != null && movies.Count() > 0)
             {
-                movieDtos = ConvertMovieDto(movies);
+                movieDtos = movies.Select(m => new MovieDto
+                {
+                    id = m.Id,
+                    title = m.Title,
+                    partialTitle = m.PartialTitle,
+                    yearOfRelease = m.YearOfRelease,
+                    runningTime = m.RunningTime.ToString(),
+                    genres = m.Genres,
+                    averageRating = GetMovieAvgRating(m.Ratings)
+                    //userRating = null,
+                }).OrderBy(m => m.title).ToList();
             }
             return movieDtos;
         }
 
-        private List<MovieDto> ConvertMovieDto(IEnumerable<Movie> movies)
+        private double GetMovieAvgRating(List<Rating> ratings)
         {
-            var movieDtos = new List<MovieDto>();
-            movieDtos = movies.Select(m => new MovieDto
-            {
-                id = m.Id,
-                title = m.Title,
-                partialTitle = m.PartialTitle,
-                yearOfRelease = m.YearOfRelease,
-                runningTime = m.RunningTime.ToString(),
-                genres = m.Genres,
-                averageRating = GetMovieAvgRating(m.Id)
-                //,
-                //userRating = null,
-            }).OrderBy(m => m.title).ToList();
-
-            return movieDtos;
-        }
-
-        private double GetMovieAvgRating(int movieId)
-        {
-            var ratings = _context.Ratings
-                .Where(r => r.MovieId == movieId)
-                .ToArray();
-
             return Math.Round(ratings.Select(x => x.RatingScore).DefaultIfEmpty(0).Average() * 2, MidpointRounding.AwayFromZero) / 2;
         }
     }
